@@ -1,0 +1,144 @@
+services:
+  # ================================
+  # VPN WireGuard
+  # ================================
+  vpn:
+    image: linuxserver/wireguard
+    container_name: vpn
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SERVERURL=vps.midominio.com
+      - SERVERPORT=51820
+      - PEERS=4  # clientes externos que quieras conectar
+    volumes:
+      - ./config/wireguard:/config
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
+
+  # ================================
+  # Servidor MTA1 (Postfix + Dovecot)
+  # ================================
+  mta1:
+    image: docker.io/mailserver/docker-mailserver:latest
+    container_name: mta1
+    hostname: mail1
+    domainname: myteam1.local
+    environment:
+      - ENABLE_SPAMASSASSIN=0
+      - ENABLE_CLAMAV=0
+      - ENABLE_FAIL2BAN=0
+      - ENABLE_POSTGREY=0
+      - ENABLE_OPENDKIM=0
+      - ENABLE_OPENDMARC=0
+      - ENABLE_POLICYD_SPF=0
+      - ENABLE_AMAVIS=0
+      - ONE_DIR=1
+      - DMS_DEBUG=1
+      - OVERRIDE_HOSTNAME=mail1.myteam1.local
+      - POSTFIX_INET_PROTOCOLS=ipv4
+      - SPOOF_PROTECTION=0
+      - PERMIT_DOCKER=network
+    volumes:
+      - maildata1_vol:/var/mail
+      - mailstate1_vol:/var/mail-state
+      - ./config1:/tmp/docker-mailserver/
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "2525:25"
+      - "2143:143"
+      - "2587:587"
+    networks:
+      - vpnnet
+
+  # Cliente webmail (Roundcube) conectado a MTA1
+  webmail1:
+    image: roundcube/roundcubemail:latest
+    container_name: webmail1
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=tls://mta1:143
+      - ROUNDCUBEMAIL_SMTP_SERVER=tls://mta1:587
+    depends_on:
+      - mta1
+    volumes:
+      - ./roundcube/config:/var/roundcube/config
+      - ./image:/var/roundcube/assets
+    ports:
+      - 8081:80
+    networks:
+      - vpnnet
+
+  # ================================
+  # Servidor MTA2 (Postfix + Dovecot)
+  # ================================
+  mta2:
+    image: docker.io/mailserver/docker-mailserver:latest
+    container_name: mta2
+    hostname: mail2
+    domainname: myteam2.local
+    environment:
+      - ENABLE_SPAMASSASSIN=0
+      - ENABLE_CLAMAV=0
+      - ENABLE_FAIL2BAN=0
+      - ENABLE_POSTGREY=0
+      - ENABLE_OPENDKIM=0
+      - ENABLE_OPENDMARC=0
+      - ENABLE_POLICYD_SPF=0
+      - ENABLE_AMAVIS=0
+      - ONE_DIR=1
+      - DMS_DEBUG=1
+      - OVERRIDE_HOSTNAME=mail2.myteam2.local
+      - POSTFIX_INET_PROTOCOLS=ipv4
+      - SPOOF_PROTECTION=0
+      - PERMIT_DOCKER=network
+    volumes:
+      - maildata2_vol:/var/mail
+      - mailstate2_vol:/var/mail-state
+      - ./config2:/tmp/docker-mailserver/
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "3525:25"
+      - "3143:143"
+      - "3587:587"
+    networks:
+      - vpnnet
+
+  # Cliente webmail (Roundcube) conectado a MTA2
+  webmail2:
+    image: roundcube/roundcubemail:latest
+    container_name: webmail2
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=tls://mta2:143
+      - ROUNDCUBEMAIL_SMTP_SERVER=tls://mta2:587
+    depends_on:
+      - mta2
+    volumes:
+      - ./roundcube/config:/var/roundcube/config
+      - ./image:/var/roundcube/assets
+    ports:
+      - 8082:80
+    networks:
+      - vpnnet
+
+networks:
+  vpnnet:
+    external: false
+
+volumes:
+  maildata1_vol:
+    driver: local
+  mailstate1_vol:
+    driver: local
+  maildata2_vol:
+    driver: local
+  mailstate2_vol:
+    driver: local

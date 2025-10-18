@@ -1,0 +1,29 @@
+:root{
+  --tr-primary:#0ea5e9; /* cyan-500 */
+  --tr-primary-hover:#0284c7; /* cyan-600 */
+  --tr-accent:#4f46e5; /* indigo-600 */
+}
+/* Login logo spacing */
+#layout>div.login>div.logo{margin-bottom:14px}
+/* Replace default logo size */
+#layout>div.login>div.logo img{height:64px;width:auto}
+/* Inputs focus */
+.login-form .input>input:focus{border-color:var(--tr-primary); box-shadow:0 0 0 3px rgba(14,165,233,.25)}
+/* Primary button */
+.login-form .formbuttons input.button.main,
+.login-form .formbuttons button.button.main,
+.button.main,
+.btn-primary{
+  background:var(--tr-primary) !important;
+  border-color:var(--tr-primary) !important;
+  color:#fff !important;
+}
+.login-form .formbuttons input.button.main:hover,
+.login-form .formbuttons button.button.main:hover,
+.button.main:hover,
+.btn-primary:hover{
+  background:var(--tr-primary-hover) !important;
+  border-color:var(--tr-primary-hover) !important;
+}
+/* Links (soporte, etc.) */
+.login .support-link a{color:var(--tr-accent)}

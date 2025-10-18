@@ -1,0 +1,15 @@
+# Configuración adicional para evitar problemas de queue write
+# Aumentar el timeout para escritura de archivos
+queue_run_delay = 300s
+minimal_backoff_time = 300s
+maximal_backoff_time = 4000s
+
+# Mejorar la gestión de memoria y archivos temporales
+message_size_limit = 10240000
+mailbox_size_limit = 0
+
+# Configuración para evitar problemas con archivos de cola
+queue_minfree = 0
+
+# Configuración de transporte para enrutar correos entre dominios
+transport_maps = texthash:/tmp/docker-mailserver/postfix-transport.cf

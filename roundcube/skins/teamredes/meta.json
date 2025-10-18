@@ -1,0 +1,8 @@
+{
+  "name": "teamredes",
+  "displayname": "TeamRedes Skin",
+  "extends": "elastic",
+  "author": "MyTeamRedesI",
+  "license": "MIT",
+  "version": "1.0.0"
+}
